@@ -70,3 +70,5 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:-appl
 .upg{margin-top:6px;border-top:1px solid #5a4030;padding-top:6px}.upg small{display:block;margin-top:3px;font-size:10px}
 .upg button.asc{background:linear-gradient(#6a2aa0,#3a1060);border-color:#ff9a1f}.pips{display:flex;gap:3px;margin-top:4px}.pips i{width:14px;height:5px;background:#2a1c12;border:1px solid #6a5040}.pips i.on{background:#ffc24a}
 .rb3{box-shadow:0 0 5px #b45cff}
+#banner{white-space:nowrap}
+.grid p{grid-column:1/-1}
