@@ -63,3 +63,4 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:-appl
 #alert{position:absolute;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 40px 6px #f22}
 #alert b{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 84px);width:22px;height:22px;border-radius:50%;background:#d22;border:2px solid #ffc24a;color:#fff;text-align:center;line-height:18px;font-size:16px}
 #alert.on{animation:al 1.4s ease-out}@keyframes al{0%{opacity:0}15%{opacity:.9}100%{opacity:0}}
+#modal{z-index:10}
