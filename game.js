@@ -1,6 +1,6 @@
 'use strict';
 (function(){
-const W=360,H=640,cv=document.getElementById('cv'),ctx=cv.getContext('2d');ctx.scale(2,2);ctx.hd=1;
+const W=360,H=640,cv=document.getElementById('cv'),ctx=cv.getContext('2d');function fitCv(){if(cv.width!==W*2||cv.height!==H*2){cv.width=W*2;cv.height=H*2}ctx.setTransform(2,0,0,2,0,0)}fitCv();['resize','orientationchange','pageshow'].forEach(e=>addEventListener(e,fitCv));if(window.visualViewport)visualViewport.addEventListener('resize',fitCv);cv.addEventListener('contextrestored',fitCv);ctx.hd=1;
 const $=id=>document.getElementById(id);
 const KEY='la_caverna_v1';
 const RAR=['Común','Poco común','Raro','Épico','Legendario'],RCOL=['#b8b0a2','#4fd04a','#3f8cff','#b45cff','#ff9a1f'];
@@ -484,7 +484,7 @@ function tower(t){if(!S.tw.lv)return;const h=towerH(),[x,y]=TW,br=S.tw.hp<=0;sha
  paint(ctx,[[-10,-h,3,h,'#7a5232'],[7,-h,3,h,'#7a5232'],[-7,-h*.6,14,2,'#5a3a1c'],[-7,-h*.3,14,2,'#5a3a1c'],[-14,-h-4,28,5,'#8a6238'],[-14,-h-10,2,6,'#7a5232'],[12,-h-10,2,6,'#7a5232'],[-14,-h-11,28,2,'#5a3a1c'],[-2,-h-20,2,10,'#5a3a1c'],[0,-h-20,7,4,S.tw.lv>2?'#ff9a1f':S.tw.lv>1?'#3f8cff':'#c33']])}ctx.restore();bar(x,y-h-24,S.tw.hp/S.tw.max,'#ec4')}
 function front(t){ctx.fillStyle='#0d0805';for(let i=0;i<9;i++){const x=i*45+Math.sin(t*.3+i)*2-8,l=26+((i*37)%30);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+18,0);ctx.lineTo(x+10+Math.sin(t*.4+i),l);ctx.closePath();ctx.fill()}
  for(let i=0;i<2;i++){const x=i?W+6:-6;ctx.beginPath();ctx.ellipse(x+Math.sin(t*.25+i)*3,300,26,170,0,0,7);ctx.fill()}}
-function draw(t){nowT=t;FL=1+.035*Math.sin(t*13.1)+.025*Math.sin(t*7.7+1)+.015*Math.sin(t*23);ctx.save();if(shk>0)ctx.translate(Math.round(R(-2,2)),Math.round(R(-2,2)));bg();buildings();fire(t);lake(t);
+function draw(t){ctx.setTransform(2,0,0,2,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';nowT=t;FL=1+.035*Math.sin(t*13.1)+.025*Math.sin(t*7.7+1)+.015*Math.sin(t*23);ctx.save();if(shk>0)ctx.translate(Math.round(R(-2,2)),Math.round(R(-2,2)));bg();buildings();fire(t);lake(t);
  const all=S.surv.filter(s=>!s.out).map(s=>({o:s,f:person})).concat(Z.map(z=>({o:z,f:zombie})));if(S.dog)all.push({o:S.dog,f:dog});if(S.tw.lv)all.push({o:{y:TW[1]-.5},f:()=>tower(t)});all.sort((a,b)=>a.o.y-b.o.y).forEach(e=>e.f(e.o,t));
  // reflection of fire in lake
  for(const f of FX){if(f.t==='hit'){ctx.fillStyle='rgba(255,240,180,'+f.l*3+')';ctx.beginPath();ctx.arc(f.x,f.y,8*(1-f.l*2),0,7);ctx.fill()}
