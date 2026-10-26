@@ -35,7 +35,7 @@ function bMax(k){return 40+(S.bld[k].lv||1)*30}
 function T(k){return S.tal.indexOf(k)>=0}const TL=T;
 function tpts(){const p=P();return Math.max(0,p.lv-2)-S.tal.length}
 let noSave=0;function save(){if(noSave)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-S=load();S.surv.forEach(s=>{if(s.away)s.y=60});
+S=load();S.surv.forEach(s=>{if(s.away)s.y=60;else{s.out=false;if(s.away<0)s.away=0;if(s.role==='player'&&!(((s.x-180)/172)**2+((s.y-414)/52)**2<1)){s.x=180;s.y=412;s.tx=180;s.ty=412}}});
 const P=()=>S.surv[0];
 function log(m){S.log.unshift(m);S.log=S.log.slice(0,3);renderLog()}
 function renderLog(){$('log').innerHTML=S.log.map((m,i)=>'<div style="opacity:'+(1-i*.17)+'">'+m+'</div>').join('')}
@@ -152,7 +152,7 @@ function canGo(s){return s&&!s.away&&s.hp>=s.max*.3}
 function expedition(i,j){const a=S.surv[i],b=j!=null?S.surv[j]:null;if(!canGo(a)||(b&&!canGo(b)))return;let d=R(20,40)*(1-.08*bL(3))*(T('veloz')&&(a.role==='player'||(b&&b.role==='player'))?.7:1);
  for(const s of b?[a,b]:[a]){s.dest=S.dest||0;if(isGuard(s)){S.tw.who=null}s.el=0;s.away=d;s.dur=d;s.tx=180+(s===b?10:0);s.ty=90;s.out=false;s.mate=null;s.quiet=false}if(b){a.mate=j;b.quiet=true}
  log('🧭 '+a.name+(b?' y '+b.name:'')+' salen de expedición');S.sel=[];closeM();save()}
-function returnExp(s){S.cnt.exp++;s.out=false;s.y=70;s.x=180;s.tx=R(110,260);s.ty=R(390,420);if(s.quiet){s.quiet=false;return}
+function returnExp(s){S.cnt.exp++;s.out=false;s.y=70;s.x=180;s.el=0;s.down=0;s.tx=R(110,260);s.ty=R(390,420);if(s.quiet){s.quiet=false;return}
  const b=s.mate!=null?S.surv[s.mate]:null;s.mate=null;const team=b?[s,b]:[s];const pl=team.some(q=>q.role==='player');
  const mul=(b?1.6:1)*(pl&&T('ojo')?1.5:1),R2=n=>Math.round(n*mul);
  const D=DEST[s.dest||0]||DEST[0],g={madera:R2(RI(2,6)*D.m),metal:R2(RI(0,3)*D.m),comida:R2(RI(1,5)*D.m)};if(Math.random()<.35)g.fragmento=RI(1,2+lootT());for(const k in D.g)g[k]=(g[k]||0)+R2(RI(1,D.g[k]));if(Math.random()<.4*mul)g.medicina=1;
@@ -200,7 +200,7 @@ function bossSkill(z,T,home){const e=z.enr?1.5:1;
  if(z.ty==='ahogado'){const s=T.tg;if(s&&s.hp>0){s.x+=(z.x-s.x)*.6;s.y+=(z.y-s.y)*.6;s.hp-=z.atk*e;s.hit=.3;shk=.3;log('🌊 El Ahogado arrastra a '+s.name)}return}
  if(z.ty==='gigante'){shk=.7;FX.push({t:'dust',x:z.x,y:z.y,l:1});for(const s of home)if(Math.hypot(s.x-z.x,(s.y-z.y)*1.4)<T.r){s.hp-=z.atk*e*.6;s.hit=.3}for(const k in S.bld){const b=BUILD[k];if(Math.hypot(b.x-z.x,(b.y-z.y)*1.4)<T.r+20&&!TL('refuerzo')){S.bld[k].broken=true;S.bld[k].hp=0;toast('💥 El Gigante destroza '+b.n)}}if(S.tw.lv&&Math.hypot(TW[0]-z.x,TW[1]-z.y)<T.r+20)S.tw.hp=Math.max(0,S.tw.hp-60)}}
 // constant trickle + numbered escalating waves (Last Stand style)
-function attract(dt){const fe=Math.max(.5,fireEff());
+function attract(dt){if(S.surv.every(q=>q.away>0)){S.tr=Math.max(S.tr||0,10);return}const fe=Math.max(.5,fireEff());
  if(S.pend){S.pend.t-=dt;if(S.pend.t<=0){spawnGroup(S.pend.n,S.pend.b);S.pend=null}}
  const solo=S.surv.length<=1,hold=S.mode==='story'&&S.q.ch<1&&S.q.mi<2;S.tr=(S.tr||0)-dt;if(S.tr<=0&&S.tick>(solo?90:45)&&!hold){S.tr=Math.max(6,14-fe)*R(.6,1.4)*(solo?2.2:S.surv.length<3?1.4:1);if(Z.length<(solo?2:8+S.fire*2)){const n=solo?1:RI(1,Math.min(3,1+Math.ceil(fe/3)));for(let i=0;i<n;i++){const ty=S.fire>=2&&Math.random()<.3?'corredor':'errante',p=spawnAt(ty);spawnZ(p[0],p[1],false,ty);const ez=Z[Z.length-1];ez.hp=ez.max=Math.round(ez.max*.7);ez.atk*=.6}alertCue()}}
  if(S.fire>=6&&!curBoss()&&Math.random()<dt*.0015*(S.fire-5)*(S.dim?.5:1)){const ok=bossOk();spawnBoss(pick(ok))}
@@ -229,7 +229,7 @@ const M=$('modal'),C=$('card');function openM(h){C.innerHTML=h;M.classList.remov
 M.addEventListener('click',e=>{if(e.target===M)closeM();const b=e.target.closest('[data-f]');if(!b||b.disabled)return;const f=b.dataset.f,v=b.dataset.v;
  ({close:closeM,exp:()=>expedition(+v),fire:upFire,rep:()=>repair(v),heal:()=>heal(+v),eq:()=>equip(+v),uneq:()=>unequip(v),sel:()=>selExp(+v),go:()=>{const a=S.sel;if(a.length)expedition(a[0],a[1])},slot:()=>detail('s',v),inv:()=>detail('i',+v),stp:()=>{if(S.pts>0){P()[v]++;S.pts--;save();openEquip()}},tab:()=>{S.tab=v;openEquip()},cls:()=>{if(P().lv>=3&&!S.cls){S.cls=v;save();openEquip()}},tal:()=>learn(v),bf:()=>{const d=$('det'),b=BF[v],tl=(P().bf||{})[v];if(d&&b)d.innerHTML=b.i+' <b>'+b.n+'</b><br>'+b.d+(tl>1?'<br>Quedan '+Math.ceil(tl)+' s':' · mientras dure la condición')},enh:()=>enhance(+v),bup:()=>bUp(+v),brep:()=>bRep(+v),obld:()=>openBld(+v),otw:openTower,ofire:openFire,rup:()=>rarUp(+v),craft,twb:twBuild,twr:twRep,twa:()=>twAssign(+v),dest:()=>{S.dest=+v;openExp()},dim:()=>{S.dim=!S.dim;toast(S.dim?'🌑 Bajas el fuego: menos luz, menos zombis':'🔥 Avivas el fuego');save();openFire()},reset:()=>{if(confirm('¿Empezar una nueva partida (historia)? Se guarda una copia de la actual.'))newStory()},newg:()=>{if(confirm('¿Empezar una nueva partida (historia)? Se guarda una copia de la actual.'))newStory()},keep:()=>{S.askNew=0;save();closeM()},inx:introNext,chgo:()=>{S.pc=0;C.classList.remove('icard');closeM();save()},respawn,clr:()=>clearObs(+v),profile:()=>profile(+v)})[f]()});
 const X='<button class="btn" data-f="close">Cerrar</button>';
-function openExp(){const duo=S.fire>=3;let h='<h3>🧭 Expedición</h3><p>'+(duo?'Elige 1 o 2 supervivientes. En pareja: +60% botín, menos riesgo y ambos ganan XP (pero hay menos defensores).':'Elige quién sale (20-40 s). Riesgo de heridas.')+'</p>'+(duo?'':'<p class="lock">🔒 Expediciones de 2 personas: Hoguera nivel 3</p>');
+function openExp(){if(S.surv.filter(q=>!q.away).length<=1&&!S.expWarn){S.expWarn=1;toast('⚠ Si sales solo, el campamento queda vacío: los ataques se pausan hasta que vuelvas, pero los zombis presentes pueden dañar edificios.')}const duo=S.fire>=3;let h='<h3>🧭 Expedición</h3><p>'+(duo?'Elige 1 o 2 supervivientes. En pareja: +60% botín, menos riesgo y ambos ganan XP (pero hay menos defensores).':'Elige quién sale (20-40 s). Riesgo de heridas.')+'</p>'+(duo?'':'<p class="lock">🔒 Expediciones de 2 personas: Hoguera nivel 3</p>');
  S.surv.forEach((s,i)=>{const ok=canGo(s),on=S.sel.indexOf(i)>=0;h+='<button class="btn'+(on?' on':'')+'" data-f="'+(duo?'sel':'exp')+'" data-v="'+i+'" '+(ok?'':'disabled')+'>'+(on?'✔ ':'')+s.name+' · nv '+s.lv+' · ♥'+Math.round(s.hp)+' · Vel '+stat(s,'ve')+(s.away?' (fuera '+Math.ceil(s.away)+'s)':'')+'</button>'});
  h+='<p><b>Destino:</b></p><div class="row">'+DEST.map((d,i)=>'<button class="btn'+((S.dest||0)===i?' on':'')+'" data-f="dest" data-v="'+i+'" '+(S.fire>=d.lv?'':'disabled')+'>'+(S.fire>=d.lv?'':'🔒')+d.n+'<small>'+(S.fire>=d.lv?'x'+d.m+' botín':'Hoguera nv '+d.lv)+'</small></button>').join('')+'</div>';
  if(duo)h+='<button class="btn gold" data-f="go" '+(S.sel.length?'':'disabled')+'>Enviar '+(S.sel.length===2?'pareja':'')+'</button>';openM(h+X)}
@@ -337,7 +337,7 @@ const IN={jx:0,jy:0,sh:0,k:{}};let lock=null,cam={x:180,y:400},ZM=1.3;
 function inVec(){let x=IN.jx,y=IN.jy;const k=IN.k;if(k.KeyA||k.ArrowLeft)x=-1;if(k.KeyD||k.ArrowRight)x=1;if(k.KeyW||k.ArrowUp)y=-1;if(k.KeyS||k.ArrowDown)y=1;const d=Math.hypot(x,y);return d>1?[x/d,y/d]:[x,y]}
 function pRange(s){const rg=rangedOf(s);if(!S.eq.distancia&&s.role==='player')rg.r=Math.max(rg.r,95),rg.cd=Math.min(rg.cd,1.1);return rg}
 function walkable(x,y){if(((x-180)/172)**2+((y-414)/52)**2>1)return false;for(const i in OBS)if(S.clr.indexOf(+i)<0&&Math.hypot(x-OBS[i].x,(y-OBS[i].y)*1.6)<16)return false;return true}
-function ctrlPlayer(s,dt){const[vx,vy]=inVec(),sp=(32+stat(s,'ve')*2)*(s.bf&&s.bf.furia?1.1:1);if(vx||vy){const nx=s.x+vx*sp*dt,ny=s.y+vy*sp*.75*dt;if(walkable(nx,ny)){s.x=nx;s.y=ny}else if(walkable(nx,s.y))s.x=nx;else if(walkable(s.x,ny))s.y=ny;s.face=vx<0?-1:vx>0?1:s.face;s.tx=s.x;s.ty=s.y}
+function ctrlPlayer(s,dt){if(!walkable(s.x,s.y)){mv(s,180,408,60,dt);s.tx=s.x;s.ty=s.y;if(Math.hypot(s.x-180,s.y-408)<4){s.x=180;s.y=412}return}const[vx,vy]=inVec(),sp=(32+stat(s,'ve')*2)*(s.bf&&s.bf.furia?1.1:1);if(vx||vy){const nx=s.x+vx*sp*dt,ny=s.y+vy*sp*.75*dt;if(walkable(nx,ny)){s.x=nx;s.y=ny}else if(walkable(nx,s.y))s.x=nx;else if(walkable(s.x,ny))s.y=ny;s.face=vx<0?-1:vx>0?1:s.face;s.tx=s.x;s.ty=s.y}
  const rg=pRange(s);let best=null,bd=rg.r;for(const z of Z){if(z.hp<=0)continue;const d=Math.hypot(z.x-s.x,z.y-s.y);if(d<bd){bd=d;best=z}}lock=best;
  if(best&&s.cd<=0){if(bd<18){const[dm,cr]=atkDmg(s,(4+stat(s,'fu')*1.5)*dmgMul(s)*(1+.07*bL(4)));best.hp-=dm;numFx(best,dm,cr);FX.push({t:'swing',x:s.x,y:s.y-14,l:.2,d:best.x>s.x?1:-1},{t:'hit',x:best.x,y:best.y-8,l:.3});best.hit=.15;s.cd=(T('rapido')?.65:1)*cdMul(s);if(best.hp<=0){onKill(s);addXP(s,best.boss?20:6);best.dropped=1;zDrop(best)}}
   else if(IN.sh){shoot(s,best,rg);s.cd=rg.cd*cdMul(s)*.8}}}
