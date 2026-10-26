@@ -64,3 +64,9 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:-appl
 #alert b{position:absolute;right:10px;top:calc(env(safe-area-inset-top) + 84px);width:22px;height:22px;border-radius:50%;background:#d22;border:2px solid #ffc24a;color:#fff;text-align:center;line-height:18px;font-size:16px}
 #alert.on{animation:al 1.4s ease-out}@keyframes al{0%{opacity:0}15%{opacity:.9}100%{opacity:0}}
 #modal{z-index:10}
+#bossbar{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top) + 84px);text-align:center;pointer-events:none;text-shadow:0 2px 0 #000}
+#bossbar b{color:#ff5a3a;font-size:14px;letter-spacing:1px}#bossbar div{position:relative;height:12px;background:#200806;border:2px solid #c89a3a;outline:1px solid #000;margin-top:2px}
+#bossbar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#ff4a2a,#901808)}#bossbar i.half{left:50%;width:1px;background:#ffc24a}#bossbar small{font-size:9px;opacity:.8}
+.upg{margin-top:6px;border-top:1px solid #5a4030;padding-top:6px}.upg small{display:block;margin-top:3px;font-size:10px}
+.upg button.asc{background:linear-gradient(#6a2aa0,#3a1060);border-color:#ff9a1f}.pips{display:flex;gap:3px;margin-top:4px}.pips i{width:14px;height:5px;background:#2a1c12;border:1px solid #6a5040}.pips i.on{background:#ffc24a}
+.rb3{box-shadow:0 0 5px #b45cff}
