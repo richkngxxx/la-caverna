@@ -334,13 +334,52 @@ function drawGround(){const key=S.fire+'';if(key!==gKey){gKey=key;gx.clearRect(0
  ctx.drawImage(gcv,0,0,W,H)}
 // ---------- draw
 const fog=document.createElement('canvas');fog.width=W;fog.height=H;const fx=fog.getContext('2d');
-const rocks=[];for(let i=0;i<140;i++)rocks.push([Math.random()*W,Math.random()*470,R(6,26),R(.15,.4)]);
-function bg(){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1d16');g.addColorStop(.6,'#1b120d');g.addColorStop(1,'#0a0705');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
- rocks.forEach((r,i)=>{const L=i%3,o=Math.sin(nowT*.25+L*2)*(L+1)*1.2;ctx.fillStyle=L===2?'rgba(110,80,58,'+r[3]+')':L===1?'rgba(80,58,42,'+r[3]+')':'rgba(55,40,30,'+r[3]+')';ctx.beginPath();ctx.ellipse(r[0]+o,r[1],r[2]*(.8+L*.15),r[2]*.6*(.8+L*.15),0,0,7);ctx.fill();if(L===2){ctx.fillStyle='rgba(160,120,80,'+r[3]*.5+')';ctx.fillRect(r[0]+o-r[2]*.5,r[1]-r[2]*.45,r[2]*.7,2)}})
- // tunnel exit
- const tg=ctx.createRadialGradient(180,50,4,180,50,40);tg.addColorStop(0,'#bcd6ff');tg.addColorStop(.5,'#5a7aa8');tg.addColorStop(1,'rgba(40,50,70,0)');ctx.fillStyle=tg;ctx.beginPath();ctx.ellipse(180,52,34,26,0,0,7);ctx.fill();
- ctx.strokeStyle='#5a3c26';ctx.lineWidth=3;ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(180,78);ctx.lineTo(176,380);ctx.stroke();ctx.setLineDash([]);
- for(const c of CAVES){ctx.fillStyle='#050302';ctx.beginPath();ctx.ellipse(c[0],c[1],14,10,0,0,7);ctx.fill()}
+// ---------- cave wall (pre-rendered strata/tiers, regenerated on fire level change)
+const WH=372,TIERS=[118,198,278],wA=document.createElement('canvas'),wB=document.createElement('canvas');wA.width=wB.width=W*2;wA.height=wB.height=WH*2;const ga=wA.getContext('2d'),gb=wB.getContext('2d');ga.scale(2,2);gb.scale(2,2);let wKey='';
+const XTUN=[[90,118],[270,118],[180,198],[60,198],[300,198],[110,278],[250,278]];
+const CRY=[[22,150,1],[338,170,1],[150,250,2],[214,108,3],[330,262,3],[40,300,4],[120,160,5],[262,232,5],[300,80,6],[60,80,7],[200,150,8]];
+const DRIP=[[40,118],[150,198],[230,118],[320,278],[100,198],[200,278]];
+function wallTier(){return Math.min(3,Math.ceil(S.fire/2))}
+function buildWall(){const key=S.fire;if(key===wKey)return;wKey=key;const rnd=(a,b)=>{const v=Math.sin(a*91.7+b*47.3)*43758.5;return v-Math.floor(v)};
+ ga.clearRect(0,0,W,WH);ga.fillStyle='#14100c';ga.fillRect(0,0,W,WH);
+ for(let y=0,row=0;y<WH;row++){const rh=5+Math.floor(rnd(row,7)*4),band=Math.floor(y/46)%3;let x=-Math.floor(rnd(row,3)*10);while(x<W){const w=6+Math.floor(rnd(x,y)*13),r=rnd(y,x);const base=band===0?[54,44,36]:band===1?[50,47,44]:[60,47,36];const k=.6+r*.55,hh=rh-1-(r>.6?1:0);
+  ga.fillStyle='rgb('+Math.round(base[0]*k)+','+Math.round(base[1]*k)+','+Math.round(base[2]*k)+')';ga.fillRect(x+1,y,w-2,hh);ga.fillRect(x,y+1,w,hh-2);ga.fillStyle='rgba(255,230,190,.08)';ga.fillRect(x+1,y,w-3,1);ga.fillStyle='rgba(0,0,0,.3)';ga.fillRect(x+1,y+hh-1,w-2,1);
+  if(r>.9){ga.fillStyle='#0a0806';let cx=x+2,cy=y;for(let q=0;q<5;q++){ga.fillRect(cx,cy,1,2);cx+=rnd(q,x)>.5?1:-1;cy+=2}}x+=w}y+=rh}
+ for(let k=0;k<26;k++){const x=rnd(k,11)*W,y=rnd(k,13)*WH,r=8+rnd(k,17)*22;ga.fillStyle=k%2?'rgba(0,0,0,.22)':'rgba(90,70,50,.12)';ga.beginPath();ga.ellipse(x,y,r,r*.6,0,0,7);ga.fill()}
+ ga.fillStyle='rgba(0,0,0,.35)';ga.fillRect(0,0,W,30);
+ gb.clearRect(0,0,W,WH);const vt=wallTier();
+ // tier ledges
+ TIERS.forEach((ty,ti)=>{gb.fillStyle='#2a2018';gb.fillRect(0,ty,W,6);gb.fillStyle='#6a5640';gb.fillRect(0,ty-2,W,3);gb.fillStyle='#8a7258';for(let x=0;x<W;x+=7)gb.fillRect(x+(ti*3)%5,ty-2,4,1);gb.fillStyle='rgba(0,0,0,.45)';gb.fillRect(0,ty+6,W,4);
+  for(let x=4;x<W;x+=9+Math.floor(rnd(x,ty)*9)){const l=3+Math.floor(rnd(ty,x)*10);gb.fillStyle=rnd(x,x)>.5?'#3a5a2a':'#4a3a24';gb.fillRect(x,ty+6,1,l);if(l>8)gb.fillRect(x+1,ty+6+l-3,1,3)}});
+ // tunnels: arches with stone rim
+ const tun=XTUN.concat(CAVES.map(c=>[c[0],c[1]+8,1]));
+ tun.forEach(([x,y,sm],i)=>{const w=sm?14:20,h=sm?14:22;gb.fillStyle='#4a3e32';gb.beginPath();gb.ellipse(x,y-h*.55,w/2+3,h*.6+3,0,Math.PI,0);gb.fill();gb.fillRect(x-w/2-3,y-h*.55,w+6,h*.55);
+  gb.fillStyle='#070504';gb.beginPath();gb.ellipse(x,y-h*.55,w/2,h*.6,0,Math.PI,0);gb.fill();gb.fillRect(x-w/2,y-h*.55,w,h*.55);
+  gb.fillStyle='#6a5a48';for(let a=0;a<7;a++){const an=Math.PI+a/6*Math.PI;gb.fillRect(Math.round(x+Math.cos(an)*(w/2+2))-1,Math.round(y-h*.55+Math.sin(an)*(h*.6+2))-1,3,2)}
+  if(!sm&&i<2+S.fire){gb.fillStyle='rgba(255,150,60,.25)';gb.fillRect(x-w/2+2,y-h*.5,w-4,h*.5);gb.fillStyle='#5a3a1c';gb.fillRect(x-w/2+1,y-2,w-2,2)}});
+ // walkways, ladders, scaffolding by level
+ const plank=(x1,x2,y)=>{gb.fillStyle='#1a0e06';gb.fillRect(x1,y-1,x2-x1,4);gb.fillStyle='#8a5a2c';for(let x=x1;x<x2;x+=4){gb.fillRect(x,y,3,2)}gb.fillStyle='#5a3416';gb.fillRect(x1,y-6,x2-x1,1);for(let x=x1;x<=x2;x+=12)gb.fillRect(x,y-6,1,6)};
+ const ladder=(x,y1,y2)=>{gb.fillStyle='#1a0e06';gb.fillRect(x-1,y1,8,y2-y1);gb.fillStyle='#8a6a3a';gb.fillRect(x,y1,1,y2-y1);gb.fillRect(x+5,y1,1,y2-y1);for(let y=y1+2;y<y2;y+=4)gb.fillRect(x,y,6,1)};
+ const scaff=(x,y1,y2)=>{gb.fillStyle='#5a3416';gb.fillRect(x,y1,2,y2-y1);gb.fillRect(x+14,y1,2,y2-y1);for(let y=y1;y<y2;y+=14){gb.fillRect(x,y,16,2);gb.fillStyle='#4a2a10';gb.beginPath();gb.moveTo(x,y);gb.lineTo(x+16,y+14);gb.lineTo(x+15,y+14);gb.lineTo(x,y+1);gb.fill();gb.fillStyle='#5a3416'}};
+ ladder(176,80,TIERS[0]-2);
+ if(S.fire>=1){plank(130,230,TIERS[2]-2);ladder(200,TIERS[1],TIERS[2]-2)}
+ if(S.fire>=2){scaff(30,TIERS[2]+6,370);plank(70,150,TIERS[1]-2)}
+ if(S.fire>=3){ladder(120,TIERS[0],TIERS[1]-2);plank(230,330,TIERS[1]-2)}
+ if(S.fire>=4){scaff(312,TIERS[2]+6,370);plank(60,130,TIERS[0]-2);ladder(290,TIERS[1],TIERS[2]-2)}
+ if(S.fire>=5){plank(240,320,TIERS[0]-2);ladder(250,TIERS[0],TIERS[1]-2)}
+ if(S.fire>=6){scaff(150,TIERS[0]+6,TIERS[1]-2);plank(20,90,TIERS[2]-2)}
+ if(S.fire>=7){ladder(50,TIERS[0],TIERS[1]-2);plank(270,350,TIERS[2]-2)}
+ // crystal veins
+ for(const[x,y,l]of CRY){if(S.fire<l)continue;gb.fillStyle='#1a2a4a';gb.fillRect(x-6,y+2,12,2);for(let k=0;k<4;k++){const h=5+((k*7+x)%6),cx=x-5+k*3;gb.fillStyle='#0e1a36';gb.fillRect(cx-1,y-h-1,4,h+2);gb.fillStyle=k%2?'#3f8cff':'#6ab0ff';gb.fillRect(cx,y-h,2,h);gb.fillStyle='#d8f0ff';gb.fillRect(cx,y-h,1,1)}}
+ // stalactites top
+ for(let x=0;x<W;x+=6){const l=4+Math.floor(rnd(x,1)*18);gb.fillStyle='#2a2018';gb.fillRect(x,0,5,l);gb.fillStyle='#4a3a2c';gb.fillRect(x+1,0,2,l-2);gb.fillStyle='#3a5a2a';if(rnd(x,2)>.7)gb.fillRect(x+3,l-1,1,6)}}
+function wallFx(t){for(const[x,y,l]of CRY){if(S.fire<l)continue;const a=.18+.1*Math.sin(t*1.5+x),g=ctx.createRadialGradient(x,y-4,1,x,y-4,16);g.addColorStop(0,'rgba(90,170,255,'+a+')');g.addColorStop(1,'rgba(60,120,255,0)');ctx.fillStyle=g;ctx.fillRect(x-16,y-20,32,32)}
+ XTUN.forEach(([x,y],i)=>{if(i>=2+S.fire)return;const f=1+.2*Math.sin(t*13+i*3);ctx.fillStyle='rgba(255,170,70,'+(.25*f)+')';ctx.beginPath();ctx.arc(x+6,y-8,7*f,0,7);ctx.fill();ctx.fillStyle='#3a2410';ctx.fillRect(x+5,y-8,3,4);ctx.fillStyle=f>1.1?'#ffe28a':'#ffb040';ctx.fillRect(x+6,y-7,1,2)});
+ ctx.fillStyle='rgba(150,200,230,.6)';DRIP.forEach(([x,y],i)=>{const p=((t*.5+i*.37)%1);ctx.fillRect(x,y+6,1,3);if(p<.7)ctx.fillRect(x,Math.round(y+8+p*p*90),1,2)});
+ const bp=(t%24)/6;if(bp<1){for(let k=0;k<3;k++){const x=-20+bp*400+k*14,y=60+Math.sin(t*3+k)*12+k*8,fl=Math.sin(t*25+k)>0;ctx.fillStyle='#0a0806';ctx.fillRect(Math.round(x)-1,Math.round(y),3,2);ctx.fillRect(Math.round(x)-(fl?4:3),Math.round(y)-(fl?2:0),3,1);ctx.fillRect(Math.round(x)+2,Math.round(y)-(fl?2:0),3,1)}}}
+function bg(){buildWall();ctx.fillStyle='#0a0705';ctx.fillRect(0,0,W,H);const o1=Math.sin(nowT*.25)*.8,o2=Math.sin(nowT*.25+2)*1.6,sm=ctx.imageSmoothingEnabled;ctx.imageSmoothingEnabled=false;ctx.drawImage(wA,o1-2,0,W+4,WH);ctx.drawImage(wB,o2,0,W,WH);ctx.imageSmoothingEnabled=sm;
+ const tg=ctx.createRadialGradient(180,50,4,180,50,40);tg.addColorStop(0,'#bcd6ff');tg.addColorStop(.5,'#5a7aa8');tg.addColorStop(1,'rgba(40,50,70,0)');ctx.fillStyle=tg;ctx.beginPath();ctx.ellipse(180,52,30,22,0,0,7);ctx.fill();
+ wallFx(nowT);
  // player cave
  const cs=Math.min(34,12+S.cave*1.5);ctx.fillStyle='#120a06';ctx.beginPath();ctx.ellipse(70,300,cs,cs*.65,0,0,7);ctx.fill();ctx.strokeStyle='#8a5a2a';ctx.lineWidth=2;ctx.stroke();
  ctx.fillStyle='#ffb35a';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText('Tu cueva nv'+S.cave,70,300-cs*.65-4);
