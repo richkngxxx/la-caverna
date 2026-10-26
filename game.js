@@ -124,7 +124,7 @@ const SL_L=['cabeza','cuerpo','manos'],SL_R=['arma','linterna','pies','mochila']
 function slotHTML(sl){const it=S.eq[sl],ex=!SLOTS[sl];return'<div class="slot'+(it?' rb'+it.r:'')+(ex?' empty':'')+'" data-f="slot" data-v="'+sl+'"><canvas class="ic" width="20" height="20" data-ic="'+(it?'e:'+sl:'')+'"></canvas><small>'+(SLOTS[sl]||XSLOTS[sl])+'</small></div>'}
 const SN={fu:'Fuerza',ve:'Velocidad',va:'Valor'};
 function sheetHead(){const p=P(),c=S.cls&&CLS[S.cls];return'<div class="nm"><b>'+p.name+'</b> · Nivel '+p.lv+' · '+(c?c.i+' '+c.n:'Superviviente')+'</div><div class="xb"><i style="width:'+Math.min(100,p.xp/(p.lv*20)*100)+'%"></i><span>XP '+p.xp+'/'+p.lv*20+'</span></div><div class="xb hp"><i style="width:'+p.hp/p.max*100+'%"></i><span>♥ '+Math.round(p.hp)+'/'+p.max+'</span></div>'}
-function gearHTML(){const p=P();let h='<div class="doll"><div class="col">'+SL_L.map(slotHTML).join('')+'</div><div class="mid"><canvas id="doll" width="72" height="56"></canvas></div><div class="col">'+SL_R.map(slotHTML).join('')+'</div></div>';
+function gearHTML(){const p=P();let h='<div class="doll"><div class="col">'+SL_L.map(slotHTML).join('')+'</div><div class="mid"><canvas id="doll" width="96" height="60"></canvas></div><div class="col">'+SL_R.map(slotHTML).join('')+'</div></div>';
  h+='<div class="stats">'+(S.pts?'<div class="pts">✨ '+S.pts+' puntos para repartir</div>':'')+Object.keys(SN).map(k=>{const g=gearB(k);return'<div class="st"><span>'+SN[k]+'</span><b>'+stat(p,k)+'</b>'+(g?'<em>(+'+g+')</em>':'<em></em>')+(S.pts?'<button data-f="stp" data-v="'+k+'">+</button>':'')+'</div>'}).join('')+(S.dog?'<div class="st"><span>🐕 Perro</span><b>♥'+Math.round(S.dog.hp)+'</b><em></em></div>':'')+'</div><div id="det" class="det">Toca una casilla u objeto.</div>';return h}
 function talentHTML(){const p=P();if(p.lv<3)return'<p class="lock">🔒 Al nivel 3 eliges clase y desbloqueas talentos (1 punto por nivel).<br>Te faltan '+(3-p.lv)+' nivel(es).</p>';
  if(!S.cls)return'<p>Elige tu clase (definitiva):</p>'+Object.keys(CLS).map(k=>{const c=CLS[k];return'<button class="btn" data-f="cls" data-v="'+k+'">'+c.i+' '+c.n+'<small>'+c.t[0].map(x=>x[1]).join(' · ')+'</small></button>'}).join('');
@@ -257,8 +257,8 @@ function iconRects(it){const k=kind(it),m=metal(it.r);
 function drawIcon(cv,it){const c=cv.getContext('2d');c.clearRect(0,0,20,20);if(!it)return;c.save();
  if(it.sl==='arma'){c.translate(10,10);c.rotate(Math.PI/4);c.translate(-1,kind(it)==='Lanza'?12:8);paint(c,iconRects(it))}else{c.translate(10,10);paint(c,iconRects(it))}c.restore()}
 function drawDoll(){const cv=$('doll');if(!cv)return;const c=cv.getContext('2d');c.clearRect(0,0,cv.width,cv.height);
- c.fillStyle='rgba(255,170,60,.12)';c.beginPath();c.ellipse(28,50,22,4,0,0,7);c.fill();
- c.save();c.translate(28,50);hero(c,P(),S.eq,0,true);c.restore();if(S.dog){c.save();c.translate(58,50);dogR(c);c.restore()}}
+ c.fillStyle='rgba(255,170,60,.12)';c.beginPath();c.ellipse(42,52,22,4,0,0,7);c.fill();
+ c.save();c.translate(42,52);hero(c,P(),S.eq,0,true);c.restore();if(S.dog){c.save();c.translate(74,52);dogR(c);c.restore()}}
 function bar(x,y,f,c){ctx.fillStyle='#000';ctx.fillRect(x-10,y,20,3);ctx.fillStyle=c;ctx.fillRect(x-10,y,20*Math.max(0,f),3)}
 function zombie(z,t){const d=ZT[z.ty||'errante'],k=d.sz,y=Math.round(z.y+Math.sin(t*4+z.x)*1.5),f=z.hit>0,sw=Math.round(Math.sin(t*5+z.x)*2),c=d.c,h=d.h;ctx.save();ctx.translate(Math.round(z.x),y);ctx.scale(k,k);
  if(d.boss){ctx.fillStyle='rgba(80,200,220,.25)';ctx.beginPath();ctx.ellipse(0,0,16,4,0,0,7);ctx.fill()}

@@ -36,8 +36,8 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:-appl
 .tabs{display:flex;gap:4px;margin:6px 0}.tabs button{flex:1;padding:7px;background:#2a1c12;color:#ffe2b0;border:2px solid #5a4030;border-radius:4px 4px 0 0;font-weight:700}.tabs button.on{border-color:#c89a3a;background:#4a2c16}
 .doll{display:flex;justify-content:space-between;align-items:center;background:radial-gradient(#3a2414,#140c06);border:2px solid #5a4a3a;padding:6px;border-radius:4px}
 .doll .col{display:flex;flex-direction:column;gap:5px}
-.doll .mid{flex:1;display:flex;justify-content:center}
-#doll{width:180px;height:140px;image-rendering:pixelated;image-rendering:crisp-edges}
+.doll .mid{flex:1;overflow:hidden;display:flex;justify-content:center}
+#doll{width:216px;height:135px;image-rendering:pixelated;image-rendering:crisp-edges}
 .slot{width:46px;height:46px;background:#120a05;border:3px solid #5a5048;box-shadow:inset 0 0 0 1px #000;position:relative;display:flex;align-items:center;justify-content:center;border-radius:3px}
 .slot small{position:absolute;bottom:-1px;left:0;right:0;font-size:7px;text-align:center;opacity:.7}
 .slot.empty{opacity:.45}
